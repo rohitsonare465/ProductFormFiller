@@ -23,6 +23,7 @@ class FillStatus(str, Enum):
     FAILED = "failed"
 
 
+# pyrefly: ignore [unexpected-keyword]
 @dataclass(frozen=True, slots=True)
 class TypingDelays:
     character_min: float
@@ -42,46 +43,73 @@ class TypingDelays:
     jitter_ratio: float
 
 
+SLOW_PROFILE = "slow"
 NORMAL_PROFILE = "normal"
 FAST_PROFILE = "fast"
 
 
+# Fields that receive an extra "thinking" pause after typing.
+LONG_TEXT_FIELDS = {"Long Description", "Legal Disclaimer"}
+
+
 def timing_profile_to_delays(profile: str) -> TypingDelays:
     if profile == FAST_PROFILE:
+        # Target: 2-3 minutes per 41-field form.
         return TypingDelays(
-            character_min=0.025,
-            character_max=0.060,
-            word_pause_min=0.080,
-            word_pause_max=0.200,
-            tab_min=0.120,
-            tab_max=0.300,
-            field_pause_min=0.080,
-            field_pause_max=0.250,
-            group_fields_min=8,
-            group_fields_max=12,
-            group_pause_min=0.500,
-            group_pause_max=1.200,
-            long_description_pause_min=1.000,
-            long_description_pause_max=2.000,
+            character_min=0.02,
+            character_max=0.05,
+            word_pause_min=0.03,
+            word_pause_max=0.08,
+            tab_min=0.10,
+            tab_max=0.25,
+            field_pause_min=0.05,
+            field_pause_max=0.15,
+            group_fields_min=10,
+            group_fields_max=15,
+            group_pause_min=0.30,
+            group_pause_max=0.80,
+            long_description_pause_min=0.50,
+            long_description_pause_max=1.20,
             jitter_ratio=0.0,
         )
 
+    if profile == SLOW_PROFILE:
+        # Target: 5-6 minutes per 41-field form.
+        return TypingDelays(
+            character_min=0.05,
+            character_max=0.10,
+            word_pause_min=0.10,
+            word_pause_max=0.25,
+            tab_min=0.30,
+            tab_max=0.55,
+            field_pause_min=0.25,
+            field_pause_max=0.60,
+            group_fields_min=5,
+            group_fields_max=8,
+            group_pause_min=1.00,
+            group_pause_max=2.50,
+            long_description_pause_min=2.00,
+            long_description_pause_max=4.00,
+            jitter_ratio=0.20,
+        )
+
+    # NORMAL_PROFILE — Target: 3-4 minutes per 41-field form.
     return TypingDelays(
-        character_min=0.040,
-        character_max=0.090,
-        word_pause_min=0.080,
-        word_pause_max=0.200,
-        tab_min=0.250,
-        tab_max=0.500,
-        field_pause_min=0.200,
-        field_pause_max=0.600,
-        group_fields_min=5,
-        group_fields_max=8,
-        group_pause_min=1.000,
-        group_pause_max=2.500,
-        long_description_pause_min=2.000,
-        long_description_pause_max=4.000,
-        jitter_ratio=0.20,
+        character_min=0.03,
+        character_max=0.07,
+        word_pause_min=0.05,
+        word_pause_max=0.12,
+        tab_min=0.15,
+        tab_max=0.35,
+        field_pause_min=0.10,
+        field_pause_max=0.30,
+        group_fields_min=8,
+        group_fields_max=12,
+        group_pause_min=0.50,
+        group_pause_max=1.20,
+        long_description_pause_min=1.00,
+        long_description_pause_max=2.00,
+        jitter_ratio=0.10,
     )
 
 
@@ -171,7 +199,7 @@ class FormFillerWorker(QObject):
 
     def _pause_after_field(self, form_field: str) -> None:
         self._sleep_interruptibly(self._delay(self._delays.field_pause_min, self._delays.field_pause_max))
-        if form_field == "Long Description":
+        if form_field in LONG_TEXT_FIELDS:
             self._sleep_interruptibly(
                 self._delay(
                     self._delays.long_description_pause_min,

@@ -28,7 +28,7 @@ from PyQt6.QtWidgets import (
 )
 
 from csv_loader import CsvLoadResult, load_product_csv, row_to_form_values
-from filler import FAST_PROFILE, NORMAL_PROFILE, FillStatus, FormFillerWorker, timing_profile_to_delays
+from filler import FAST_PROFILE, NORMAL_PROFILE, SLOW_PROFILE, FillStatus, FormFillerWorker, timing_profile_to_delays
 from settings import (
     LOG_PATH,
     AppSettings,
@@ -158,8 +158,9 @@ class MainWindow(QMainWindow):
         self.resume_button = QPushButton("Resume")
         self.stop_button = QPushButton("Stop")
         self.profile_combo = QComboBox()
-        self.profile_combo.addItem("Normal Mode (4-5 min)", NORMAL_PROFILE)
-        self.profile_combo.addItem("Fast Mode (3-3.5 min)", FAST_PROFILE)
+        self.profile_combo.addItem("Slow (5-6 min per form)", SLOW_PROFILE)
+        self.profile_combo.addItem("Normal (3-4 min per form)", NORMAL_PROFILE)
+        self.profile_combo.addItem("Fast (2-3 min per form)", FAST_PROFILE)
         profile_index = self.profile_combo.findData(self.settings.typing_profile)
         self.profile_combo.setCurrentIndex(max(0, profile_index))
         self.progress_bar = QProgressBar()

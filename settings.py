@@ -15,11 +15,12 @@ PROGRESS_PATH = APP_DIR / "progress.json"
 LOG_PATH = APP_DIR / "filled_rows.log"
 
 
+# pyrefly: ignore [unexpected-keyword]
 @dataclass(slots=True)
 class AppSettings:
     last_csv_path: str = ""
     last_completed_row: int = -1
-    typing_profile: str = "normal"
+    typing_profile: str = "fast"
     auto_advance: bool = False
     dark_mode: bool = True
 
